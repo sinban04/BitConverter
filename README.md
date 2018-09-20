@@ -8,3 +8,13 @@ like BitConverter, BitArray class in C#. So, it refers to C# classes,
 and tries to make the code independent of the platform. (e.g., Endianness)<br>
 <br>
 <br>
+
+## Build
+
+Command below would make build/ directory.
+```
+$ ./compile.sh
+$ ./build/bitConverter
+```
+
+`
