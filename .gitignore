@@ -30,3 +30,12 @@
 *.exe
 *.out
 *.app
+
+# swap files
+*.swo
+*.swp
+
+# Build
+build/
+Build/
+
