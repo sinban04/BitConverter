@@ -11,27 +11,76 @@ bool IsLittleEndian(){
   return isLittleEndian;
 }
 
+std::vector<unsigned char> GetBytes(bool value)
+{
+  std::vector<unsigned char> ret;
+  ret.reserve(1);
+  ret[0] = (value? (unsigned char) true : (unsigned char) false);
+
+  return ret;
+}
+
+std::vector<unsigned char> GetBytes(short value)
+{
+  std::vector<unsigned char> ret;
+  ret.reserve(2);
+
+  *(short*)(&ret[0]) = value;
+
+  return ret;
+}
+
+std::vector<unsigned char> GetBytes(unsigned short value)
+{
+  return GetBytes((short) value);
+}
+
+std::vector<unsigned char> GetBytes(int value)
+{
+  std::vector<unsigned char> ret;
+  ret.reserve(4);
+
+  *(int*)(&ret[0]) = value;
+
+  return ret;
+}
+
+std::vector<unsigned char> GetBytes(unsigned int value)
+{
+  return GetBytes((int) value);
+}
+
+std::vector<unsigned char> GetBytes(long long value)
+{
+  std::vector<unsigned char> ret;
+  ret.reserve(8);
+
+  *(long long*)(&ret[0]) = value;
+
+  return ret;
+}
+
+std::vector<unsigned char> GetBytes(unsigned long long value)
+{
+  return GetBytes((long long) value);
+}
+
 // ============ Bit Array ======
 std::vector<unsigned char> BitArrayCopy(
     std::vector<unsigned char>& source, int sourceIndex, int copyCount)
 {
-  std::vector<unsigned char> ret;
-  if(copyCount <= 0){
-    std::cout << "Nothing to copy. It seems unnatural";
-    return ret;
-  }
-
-  std::bitset<8> temp;
-  unsigned char tempChar;
   // First chunk info
-  int firstChunkIdx = sourceIndex / 8;
-  int firstChunkOffset = sourceIndex % 8;
+  const int firstChunkIdx = sourceIndex / 8;
+  const int firstChunkOffset = sourceIndex % 8;
+  const int validBitsFirst = 8 - firstChunkOffset;
   // Last chunk info
-  int lastIndex = sourceIndex + copyCount - 1;
-  int lastChunkIdx = lastIndex / 8;
-  int lastChunkOffset = lastIndex % 8;
-  int chunkNum = lastChunkIdx - firstChunkIdx + 1;
+  const int lastIndex = sourceIndex + copyCount - 1;
+  const int lastChunkIdx = lastIndex / 8;
+  const int lastChunkOffset = lastIndex % 8;
+  const int chunkNum = lastChunkIdx - firstChunkIdx + 1;
+  const int validBitsLast = lastChunkOffset + 1;
 
+  // Logging for debug
   std::cout << "FirstIndex: " << sourceIndex << std::endl;
   std::cout << "FirstChunkIndex: " << firstChunkIdx << std::endl;
   std::cout << "FirstChunkOffset: " << firstChunkOffset << std::endl;
@@ -42,73 +91,227 @@ std::vector<unsigned char> BitArrayCopy(
   std::cout << "chunkNum: " << chunkNum << std::endl;
   std::cout << std::endl << std::endl;
 
-  int i,j;
-  // For simple case (copyCount < 8)
-  if(chunkNum == 1){
-    std::cout << "It's simple case" << std::endl;
-    tempChar = source[firstChunkIdx];
-    // Valid bits: 8-firstChunkOffset;
-    tempChar = tempChar >> firstChunkOffset; 
-    
-    ret.push_back(tempChar);
 
-    for(auto& iter : ret){
-      auto print = std::bitset<8>(iter);
-      std::cout << "return: " << std::hex << print << std::endl;
-//      std::cout << "return: " << std::hex << (unsigned int)iter << std::endl;
-    }
+  std::vector<unsigned char> ret;
+  ret.reserve(chunkNum);
+  std::vector<bool> retBits;
+  // Expected to be filled with 0.
+  retBits.reserve(chunkNum*8);
+
+  if(copyCount <= 0){
+    std::cout << "Nothing to copy. It seems unnatural";
     return ret;
   }
 
-  std::cout << "It's complex case" << std::endl;
+  int i,j;
+  unsigned char temp;
+  std::bitset<8> tempBits;
+  // Simple Case (copycount <= 8)
+  if(1 == chunkNum){
+    tempBits = std::bitset<8>(source[firstChunkIdx]);
+    std::cout << "sourceBits: " << tempBits << std::endl;
 
-  // Full case (copyCount >= 8)
-  // Working on bit stream chunk by chunk (8 bit size)
-  std::bitset<8> first, last;
-  std::vector<unsigned char> tempVec;
-  for(i = firstChunkIdx; i < lastChunkIdx+1; i++){
-    // Get first chunk(unsigned char) from source stream vector.
-    tempChar = source[i];
-
-    if(i == firstChunkIdx){   // Valid bits: 8-firstChunkOffset
-      tempChar = tempChar >> firstChunkOffset;
-      first = std::bitset<8-firstChunkOffset>(tempChar);
+    std::cout << "copies one by one:(reversed) ";
+    for(int i = firstChunkOffset; i < lastChunkOffset+1; i++){
+      // Copy the bits
+      if(tempBits[i]){
+        retBits.push_back(true);
+      }
+      else {
+        retBits.push_back(false);
+      }
+      std::cout << tempBits[i];
     }
-    else if(i == lastChunkIdx){   // Valid bits: lastChunkOffset+1 
-      // The bit on lastChunkOffset should be preserved.
-      tempChar << 8-lastChunkOffset-1; 
-      tempChar >> 8-lastChunkOffset-1;
-      last = std::bitset<lastChunkOffset+1>(tempChar);
+    std::cout << std::endl;
+  }
+  else { 
+    // Complex Case (copyCount > 8)
+    std::cout << "It's complex case" << std::endl;
+    for(i = firstChunkIdx; i < lastChunkIdx+1; i++){
+      tempBits = std::bitset<8>(source[i]);
+      if(firstChunkIdx == i){
+        for(j = firstChunkOffset; j < 8; j++){
+          // Copy the bits
+          if(tempBits[j]){
+            retBits.push_back(true);
+          }
+          else {
+            retBits.push_back(false);
+          }
+        }
+      } 
+      else if(lastChunkIdx == i){
+        for(j = 0; j < lastChunkOffset+1; j++){
+          // Copy the bits
+          if(tempBits[j]){
+            retBits.push_back(true);
+          }
+          else {
+            retBits.push_back(false);
+          }
+        }
+      }
+      for(j = 0; j < 8; j++){
+        // Copy the bits
+        if(tempBits[j]){
+          retBits.push_back(true);
+        }
+        else {
+          retBits.push_back(false);
+        }
+      }
     }
+  } 
 
-    std::cout << "chunk: " << std::hex << (unsigned int)tempChar << std::endl;
-    tempVec.push_back(tempChar);
+
+  // Copy the chunk except the last chunk
+  for(i = 0; i < chunkNum-1; i++){
+    temp = 0x00;
+    tempBits = std::bitset<8>();
+    std::cout << "copy Chunk (reversed) :";
+    for(j = 0; j < 8; j++){
+      std::cout << retBits[8*i+j]; 
+      if(retBits[8*i + j]){
+        tempBits.set(j);
+      }
+      else {
+        tempBits.reset(j);
+      }
+    }
+    std::cout << std::endl;
+    temp = (unsigned char) tempBits.to_ulong();
+//    temp = (retBits[8*i] | retBits[8*i+1] << 1 | retBits[8*i+2] << 2 | retBits[8*i+3] << 3 |
+//        retBits[8*i+4] << 4 | retBits[8*i+5] << 5 | retBits[8*i+6] << 6 | retBits[8*i+7] << 7);
+    ret.push_back(temp);
+    std::cout << "temp: " << std::hex << (unsigned int)temp << std::endl;
   }
 
-  // Concatenation of the bits with the alignment
-  std::bitset<copyCount> retBits;
-  std::string firstBits = first.to_string();  // 8-firstChunkOffset bits
-  std::string lastBits = last.to_string();    // lastChunkOffset+1 bits
-  for(auto& iter : tempVec){
-    temp = std::bitset<8>(iter);
-    firstBits += temp.to_string();            // 8 bits
-  }
-  firstBits += lastBits;
-
-  retBits = std::bitset<copyCount>(firstBits);
-  for(i = 0; i < (copyCount/32)+1; i++){
-     
-  }
 
 
+  std::cout << "size: " << retBits.size() << std::endl;
 
+  
+  // Copy the last chunk
+  tempBits = std::bitset<8>();
+  for(i = 0; i< retBits.size() % 8; i++){ 
+    if(retBits[i]){
+      tempBits.set(i);
+    }
+    else {
+      tempBits.reset(i);
+    }
+  } 
+
+  temp = (unsigned char) tempBits.to_ulong();
+  ret.push_back(temp);
+
+
+  std::cout << "copy Last Chunk :" << tempBits << std::endl;
+  std::cout << "temp: " << std::hex << (unsigned int)temp << std::endl;
+      
   for(auto& iter : ret){
     auto print = std::bitset<8>(iter);
     std::cout << "return: " << std::hex << print << std::endl;
-    std::cout << std::endl;
-//    std::cout << "return: " << std::hex << (unsigned int)iter << std::endl;
   }
   return ret;
+
+
+  // ------------------------------------------------------
+//  std::vector<unsigned char> ret;
+//  if(copyCount <= 0){
+//    std::cout << "Nothing to copy. It seems unnatural";
+//    return ret;
+//  }
+//
+//  std::bitset<8> temp;
+//  unsigned char tempChar;
+//  // First chunk info
+//  const int firstChunkIdx = sourceIndex / 8;
+//  const int firstChunkOffset = sourceIndex % 8;
+//  // Last chunk info
+//  const int lastIndex = sourceIndex + copyCount - 1;
+//  const int lastChunkIdx = lastIndex / 8;
+//  const int lastChunkOffset = lastIndex % 8;
+//  const int chunkNum = lastChunkIdx - firstChunkIdx + 1;
+//
+//  // Logging for debug
+//  std::cout << "FirstIndex: " << sourceIndex << std::endl;
+//  std::cout << "FirstChunkIndex: " << firstChunkIdx << std::endl;
+//  std::cout << "FirstChunkOffset: " << firstChunkOffset << std::endl;
+//
+//  std::cout << "lastIndex: " << lastIndex << std::endl;
+//  std::cout << "lastChunkIndex: " << lastChunkIdx << std::endl;
+//  std::cout << "lastChunkOffset: " << lastChunkOffset << std::endl;
+//  std::cout << "chunkNum: " << chunkNum << std::endl;
+//  std::cout << std::endl << std::endl;
+//
+//  int i,j;
+//  // For simple case (copyCount < 8)
+//  if(chunkNum == 1){
+//    std::cout << "It's simple case" << std::endl;
+//    tempChar = source[firstChunkIdx];
+//    // Valid bits: 8-firstChunkOffset;
+//    tempChar = tempChar >> firstChunkOffset; 
+//    
+//    ret.push_back(tempChar);
+//
+//    for(auto& iter : ret){
+//      auto print = std::bitset<8>(iter);
+//      std::cout << "return: " << std::hex << print << std::endl;
+////      std::cout << "return: " << std::hex << (unsigned int)iter << std::endl;
+//    }
+//    return ret;
+//  }
+//
+//  std::cout << "It's complex case" << std::endl;
+//  // Full case (copyCount >= 8)
+//  // Working on bit stream chunk by chunk (8 bit size)
+//  std::bitset<8> first, last;
+//  std::vector<unsigned char> tempVec;
+//  for(i = firstChunkIdx; i < lastChunkIdx+1; i++){
+//    // Get first chunk(unsigned char) from source stream vector.
+//    tempChar = source[i];
+//
+//    if(i == firstChunkIdx){   // Valid bits: 8-firstChunkOffset
+//      tempChar = tempChar >> firstChunkOffset;
+//      first = std::bitset<8-firstChunkOffset>(tempChar);
+//    }
+//    else if(i == lastChunkIdx){   // Valid bits: lastChunkOffset+1 
+//      // The bit on lastChunkOffset should be preserved.
+//      tempChar << 8-lastChunkOffset-1; 
+//      tempChar >> 8-lastChunkOffset-1;
+//      last = std::bitset<lastChunkOffset+1>(tempChar);
+//    }
+//
+//    std::cout << "chunk: " << std::hex << (unsigned int)tempChar << std::endl;
+//    tempVec.push_back(tempChar);
+//  }
+//
+//  // Concatenation of the bits with the alignment
+//  std::bitset<copyCount> retBits;
+//  std::string firstBits = first.to_string();  // 8-firstChunkOffset bits
+//  std::string lastBits = last.to_string();    // lastChunkOffset+1 bits
+//  for(auto& iter : tempVec){
+//    temp = std::bitset<8>(iter);
+//    firstBits += temp.to_string();            // 8 bits
+//  }
+//  firstBits += lastBits;
+//
+//  retBits = std::bitset<copyCount>(firstBits);
+//  std::bitset<8> sliceBits;
+//  for(i = 0; i < (copyCount/32)+1; i++){
+//    sliceBits = std::bitset<8>(retBits.to_ulong() >> (i * 8));
+//    ret.push_back((unsigned char)sliceBits.to_ulong());
+//  }
+//
+//
+//  for(auto& iter : ret){
+//    auto print = std::bitset<8>(iter);
+//    std::cout << "return: " << std::hex << print << std::endl;
+//    std::cout << std::endl;
+////    std::cout << "return: " << std::hex << (unsigned int)iter << std::endl;
+//  }
+//  return ret;
 }
 
 

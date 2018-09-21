@@ -28,6 +28,14 @@ std::vector<unsigned char> BitArrayCopy(
 //bool BytesToBoolean(std::vector<unsigned char>& input, int startOffset);
 //double BytesToDouble(std::vector<unsigned char>& input, int startOffset);
 
+// These functions gets several data types as an input and returns byte array.
+std::vector<unsigned char> GetBytes(bool value);
+std::vector<unsigned char> GetBytes(short value);
+std::vector<unsigned char> GetBytes(unsigned short value);
+std::vector<unsigned char> GetBytes(int value);
+std::vector<unsigned char> GetBytes(unsigned int value);
+std::vector<unsigned char> GetBytes(long long value);
+std::vector<unsigned char> GetBytes(unsigned long long value);
 // These functions gets byte array with its startOffset(first index) as an input, 
 // and returns several datatypes. 
 short BytesToInt16(std::vector<unsigned char>& input, int startOffset);

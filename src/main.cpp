@@ -24,6 +24,8 @@ void bitConverterTest()
   long long _long_long;
   unsigned long long _unsigned_long_long;
 
+  std::vector<unsigned char> copy = BitConverter::BitArrayCopy(byteArray, 1, 10);
+
   _short = BitConverter::BytesToInt16(byteArray, 0);
   _unsigned_short = BitConverter::BytesToUInt16(byteArray, 0);
   _int = BitConverter::BytesToInt32(byteArray, 1);
@@ -33,7 +35,6 @@ void bitConverterTest()
 
   std::cout << "hihi" << std::endl;
 
-  std::vector<unsigned char> copy = BitConverter::BitArrayCopy(byteArray, 10, 6);
 
   std::bitset<8> b1(c1);
   unsigned char outc = (unsigned char) b1.to_ulong();
