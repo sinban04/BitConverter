@@ -188,17 +188,16 @@ std::vector<unsigned char> BitArrayCopy(
 
 
 
-  std::cout << "size: " << retBits.size() << std::endl;
-
+  std::cout << "size: " << std::dec << retBits.size() << std::endl;
   
   // Copy the last chunk
   tempBits = std::bitset<8>();
-  for(i = 0; i< retBits.size() % 8; i++){ 
-    if(retBits[i]){
-      tempBits.set(i);
+  for(j = 0; j< retBits.size() % 8; j++){ 
+    if(retBits[8*(chunkNum-1) + j]){
+      tempBits.set(j);
     }
     else {
-      tempBits.reset(i);
+      tempBits.reset(j);
     }
   } 
 
