@@ -8,6 +8,9 @@ So, it refers to C# classes, and tries to make the code independent of the platf
 <br>
 <br>
 
+## Prerequisite
+cmake, automake, gcc
+
 ## Build
 
 Command below would make build/ directory.
