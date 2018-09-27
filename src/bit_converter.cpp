@@ -11,60 +11,6 @@ bool IsLittleEndian(){
   return isLittleEndian;
 }
 
-std::vector<unsigned char> GetBytes(bool value)
-{
-  std::vector<unsigned char> ret;
-  ret.reserve(1);
-  ret[0] = (value? (unsigned char) true : (unsigned char) false);
-
-  return ret;
-}
-
-std::vector<unsigned char> GetBytes(short value)
-{
-  std::vector<unsigned char> ret;
-  ret.reserve(2);
-
-  *(short*)(&ret[0]) = value;
-
-  return ret;
-}
-
-std::vector<unsigned char> GetBytes(unsigned short value)
-{
-  return GetBytes((short) value);
-}
-
-std::vector<unsigned char> GetBytes(int value)
-{
-  std::vector<unsigned char> ret;
-  ret.reserve(4);
-
-  *(int*)(&ret[0]) = value;
-
-  return ret;
-}
-
-std::vector<unsigned char> GetBytes(unsigned int value)
-{
-  return GetBytes((int) value);
-}
-
-std::vector<unsigned char> GetBytes(long long value)
-{
-  std::vector<unsigned char> ret;
-  ret.reserve(8);
-
-  *(long long*)(&ret[0]) = value;
-
-  return ret;
-}
-
-std::vector<unsigned char> GetBytes(unsigned long long value)
-{
-  return GetBytes((long long) value);
-}
-
 // ============ Bit Array ======
 std::vector<unsigned char> BitArrayCopy(
     std::vector<unsigned char>& source, int sourceIndex, int copyCount)
@@ -217,6 +163,108 @@ std::vector<unsigned char> BitArrayCopy(
 
 }
 
+
+std::vector<unsigned char> GetBytes(bool value)
+{
+  std::vector<unsigned char> ret;
+  ret.reserve(1);
+  ret[0] = (value? (unsigned char) true : (unsigned char) false);
+
+  return ret;
+}
+
+std::vector<unsigned char> GetBytes(short value)
+{
+  std::vector<unsigned char> ret;
+  ret.reserve(2);
+
+  int i;
+  unsigned char temp = 0x00;
+  if(isLittleEndian){
+    for(i=0; i<2; i++){
+      temp = value >> 8*i;
+      ret.push_back(temp);
+      std::cout << "temp!: " << (unsigned int)temp << std::endl;
+    }
+  }
+  else {  // big endian
+    for(i=1; i>=0; i++){
+      temp = value >> 8*i;
+      ret.push_back(temp);
+      std::cout << "temp!: " << (unsigned int)temp << std::endl;
+    }
+  }
+
+//  *(short*)(&ret[0]) = value;
+
+  std::cout << "GetBytes!: " << value << std::endl;
+
+
+  return ret;
+}
+
+std::vector<unsigned char> GetBytes(unsigned short value)
+{
+  return GetBytes((short) value);
+}
+
+std::vector<unsigned char> GetBytes(int value)
+{
+  std::vector<unsigned char> ret;
+  ret.reserve(4);
+
+  int i;
+  unsigned char temp = 0x00;
+  if(isLittleEndian){
+    for(i=0; i<4; i++){
+      temp = value >> 8*i;
+      ret.push_back(temp);
+    }
+  }
+  else {  // big endian
+    for(i=3; i>=0; i++){
+      temp = value >> 8*i;
+      ret.push_back(temp);
+    }
+  }
+//  *(int*)(&ret[0]) = value;
+
+  return ret;
+}
+
+std::vector<unsigned char> GetBytes(unsigned int value)
+{
+  return GetBytes((int) value);
+}
+
+std::vector<unsigned char> GetBytes(long long value)
+{
+  std::vector<unsigned char> ret;
+  ret.reserve(8);
+
+  int i;
+  unsigned char temp = 0x00;
+  if(isLittleEndian){
+    for(i=0; i<8; i++){
+      temp = value >> 8*i;
+      ret.push_back(temp);
+    }
+  }
+  else {  // big endian
+    for(i=7; i>=0; i++){
+      temp = value >> 8*i;
+      ret.push_back(temp);
+    }
+  }
+//  *(long long*)(&ret[0]) = value;
+
+  return ret;
+}
+
+std::vector<unsigned char> GetBytes(unsigned long long value)
+{
+  return GetBytes((long long) value);
+}
 
 // ============= Bit Converter ======
 short BytesToInt16(std::vector<unsigned char>& input, int startOffset)
