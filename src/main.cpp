@@ -18,7 +18,7 @@ void bitArrayCopyTest()
   std::vector<unsigned char> byteArray = {c1, c2, c3, c4, c5, c6, c7, c8};
 
 
-  std::vector<unsigned char> copy = BitConverter::BitArrayCopy(byteArray, 3, 20);
+  std::vector<unsigned char> copy = BBUtil::BitArrayCopy(byteArray, 3, 20);
 
 
   std::bitset<8> b1(c1);
@@ -67,12 +67,12 @@ void bitConverterTest()
   long long _long_long;
   unsigned long long _unsigned_long_long;
 
-  _short = BitConverter::BytesToInt16(byteArray, 0);
-  _unsigned_short = BitConverter::BytesToUInt16(byteArray, 0);
-  _int = BitConverter::BytesToInt32(byteArray, 1);
-  _unsigned_int = BitConverter::BytesToUInt32(byteArray, 1);
-  _long_long = BitConverter::BytesToInt64(byteArray, 0);
-  _unsigned_long_long = BitConverter::BytesToUInt64(byteArray, 0);
+  _short = BBUtil::BytesToInt16(byteArray, 0);
+  _unsigned_short = BBUtil::BytesToUInt16(byteArray, 0);
+  _int = BBUtil::BytesToInt32(byteArray, 1);
+  _unsigned_int = BBUtil::BytesToUInt32(byteArray, 1);
+  _long_long = BBUtil::BytesToInt64(byteArray, 0);
+  _unsigned_long_long = BBUtil::BytesToUInt64(byteArray, 0);
 
 
   std::bitset<8> temp;
@@ -99,7 +99,7 @@ void bitConverterTest()
   std::cout << "unsigned long long : " << std::hex << _unsigned_long_long << std::endl; 
 
   std::cout << "hiHI" << std::endl;
-  std::vector<unsigned char> ret = BitConverter::GetBytes(_unsigned_int);
+  std::vector<unsigned char> ret = BBUtil::GetBytes(_unsigned_int);
   for(auto iter : ret){
     temp = std::bitset<8>(iter);
     std::cout << "bytes] vector : " << std::hex << (unsigned int)iter << std::endl; 
@@ -108,6 +108,25 @@ void bitConverterTest()
 
 }
 
+void vectorInitialization()
+{
+  unsigned char a = 0x51;
+  unsigned char b = 0x3A;
+  std::vector<unsigned char> temp;
+
+  temp = {a, b};
+
+  for(auto iter : temp){
+    std::cout << std::hex << (unsigned int) iter << std::endl;
+  }
+
+  temp.clear();
+  temp = {b, a};
+
+  for(auto iter : temp){
+    std::cout << std::hex << (unsigned int)iter << std::endl;
+  }
+}
 
 // ========================= MAIN FUNCTION =============================
 // Main Function
@@ -115,7 +134,9 @@ int main(int argc, char* argv[])
 {
   std::cout << "=== Main Program Starts. ===" << std::endl;
 
-  bitConverterTest();
+
+  vectorInitialization();
+//  bitConverterTest();
 //  bitArrayCopyTest();
 
   return 0;

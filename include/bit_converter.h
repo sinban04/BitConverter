@@ -1,12 +1,12 @@
-#ifndef BIT_CONVERTER_BIT_CONVERTER_H_
-#define BIT_CONVERTER_BIT_CONVERTER_H_
+#ifndef BIT_BYTE_UTIL_BIT_CONVERTER_H_
+#define BIT_BYTE_UTIL_BIT_CONVERTER_H_
 
 #include <iostream>
 #include <vector>
 #include <memory>
 #include <bitset>
 
-namespace BitConverter {
+namespace BBUtil {
 
 // Platform-Independent DataTypes
 // 
@@ -46,5 +46,5 @@ long long BytesToInt64(std::vector<unsigned char>& input, int startOffset);
 unsigned long long BytesToUInt64(std::vector<unsigned char>& input, int startOffset);
 
 
-} // namespace BitConverter
-#endif // BIT_CONVERTER_BIT_CONVERTER_H_
+} // namespace BBUtil 
+#endif // BIT_BYTE_UTIL_BIT_CONVERTER_H_
