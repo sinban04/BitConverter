@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(BitConverter LANGUAGES C CXX)
+project(BBUtil LANGUAGES C CXX)
 
 set(CMAKE_C_COMPILER gcc)
 set(CMAKE_CXX_COMPILER g++)
@@ -49,6 +49,6 @@ set(CODE_LIB
 include_directories(${CODE_INCLUDE})
 link_directories(${CODE_LIB})
 
-add_executable(bitConverter ${SOURCE_FILES})
+add_executable(bbTest ${SOURCE_FILES})
 
 #add_subdirectory(aaa)

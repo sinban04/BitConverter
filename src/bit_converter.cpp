@@ -1,7 +1,7 @@
 #include "bit_converter.h"
 
 
-namespace BitConverter {
+namespace BBUtil {
 
 
 //bool BytesToBoolean(std::vector<unsigned char>& input, int startOffset);
@@ -403,4 +403,4 @@ unsigned long long BytesToUInt64(std::vector<unsigned char>& input, int startOff
   return (unsigned long long) BytesToInt64(input, startOffset);
 }
 
-} // namespace BitConverter
+} // namespace BBUtil 
