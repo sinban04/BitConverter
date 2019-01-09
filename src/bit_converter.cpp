@@ -18,13 +18,12 @@ std::vector<unsigned char> BitArrayCopy(
   // First chunk info
   const int firstChunkIdx = sourceIndex / 8;
   const int firstChunkOffset = sourceIndex % 8;
-  const int validBitsFirst = 8 - firstChunkOffset;
   // Last chunk info
   const int lastIndex = sourceIndex + copyCount - 1;
   const int lastChunkIdx = lastIndex / 8;
   const int lastChunkOffset = lastIndex % 8;
   const int chunkNum = lastChunkIdx - firstChunkIdx + 1;
-  const int validBitsLast = lastChunkOffset + 1;
+
 
   // Logging for debug
   std::cout << "FirstIndex: " << sourceIndex << std::endl;
@@ -37,12 +36,9 @@ std::vector<unsigned char> BitArrayCopy(
   std::cout << "chunkNum: " << chunkNum << std::endl;
   std::cout << std::endl << std::endl;
 
-
-  std::vector<unsigned char> ret;
-  ret.reserve(chunkNum);
-  std::vector<bool> retBits;
+  std::vector<unsigned char> ret(chunkNum);
   // Expected to be filled with 0.
-  retBits.reserve(chunkNum*8);
+  std::vector<bool> retBits(chunkNum*8);
 
   if(copyCount <= 0){
     std::cout << "Nothing to copy. It seems unnatural";
@@ -50,40 +46,47 @@ std::vector<unsigned char> BitArrayCopy(
   }
 
   int i,j;
-  unsigned char temp;
+  int k;
   std::bitset<8> tempBits;
   // Simple Case (copycount <= 8)
   if(1 == chunkNum){
+    k = 0;
     tempBits = std::bitset<8>(source[firstChunkIdx]);
-    std::cout << "sourceBits: " << tempBits << std::endl;
 
+    std::cout << "sourceBits: " << tempBits << std::endl;
     std::cout << "copies one by one:(reversed) ";
+
     for(int i = firstChunkOffset; i < lastChunkOffset+1; i++){
       // Copy the bits
       if(tempBits[i]){
-        retBits.push_back(true);
+        retBits[k++] = true;
       }
       else {
-        retBits.push_back(false);
+        retBits[k++] = false;
       }
       std::cout << tempBits[i];
     }
     std::cout << std::endl;
   }
   else { 
+    k = 0;
+
     // Complex Case (copyCount > 8)
     std::cout << "It's complex case" << std::endl;
+
     for(i = firstChunkIdx; i < lastChunkIdx+1; i++){
       tempBits = std::bitset<8>(source[i]);
+
       std::cout << "sourceBits: " << tempBits << std::endl;
+
       if(firstChunkIdx == i){ // For the first chunk
         for(j = firstChunkOffset; j < 8; j++){
           // Copy the bits
           if(tempBits[j]){
-            retBits.push_back(true);
+            retBits[k++] = true;
           }
           else {
-            retBits.push_back(false);
+            retBits[k++] = false;
           }
         } // end for
       }
@@ -91,10 +94,10 @@ std::vector<unsigned char> BitArrayCopy(
         for(j = 0; j < lastChunkOffset+1; j++){
           // Copy the bits
           if(tempBits[j]){
-            retBits.push_back(true);
+            retBits[k++] = true;
           }
           else {
-            retBits.push_back(false);
+            retBits[k++] = false;
           }
         } // end for
       }
@@ -102,25 +105,28 @@ std::vector<unsigned char> BitArrayCopy(
         for(j = 0; j < 8; j++){
           // Copy the bits
           if(tempBits[j]){
-            retBits.push_back(true);
+            retBits[k++] = true;
           }
           else {
-            retBits.push_back(false);
+            retBits[k++] = false;
           }
         }
       } // end else
     }
   } 
 
-
+  unsigned char temp;
+  k = 0;
   // Copy the chunk except the last chunk
   for(i = 0; i < chunkNum-1; i++){
     temp = 0x00;
     tempBits = std::bitset<8>();
+
     std::cout << "copy Chunk (reversed) :";
+
     for(j = 0; j < 8; j++){
       std::cout << retBits[8*i+j]; 
-      if(retBits[8*i + j]){
+      if(true == retBits[8*i + j]){
         tempBits.set(j);
       }
       else {
@@ -129,17 +135,15 @@ std::vector<unsigned char> BitArrayCopy(
     }
     std::cout << std::endl;
     temp = (unsigned char) tempBits.to_ulong();
-    ret.push_back(temp);
+    ret[k++] = temp;
     std::cout << "temp: " << std::hex << (unsigned int)temp << std::endl;
   }
-
-
-
   std::cout << "size: " << std::dec << retBits.size() << std::endl;
+
   
   // Copy the last chunk
   tempBits = std::bitset<8>();
-  for(j = 0; j< retBits.size() % 8; j++){ 
+  for(j = 0; j< (copyCount % 8) + 1; j++){ 
     if(retBits[8*(chunkNum-1) + j]){
       tempBits.set(j);
     }
@@ -149,16 +153,16 @@ std::vector<unsigned char> BitArrayCopy(
   } 
 
   temp = (unsigned char) tempBits.to_ulong();
-  ret.push_back(temp);
+  ret[k++] = temp;
 
 
   std::cout << "copy Last Chunk :" << tempBits << std::endl;
   std::cout << "temp: " << std::hex << (unsigned int)temp << std::endl;
-      
   for(auto& iter : ret){
     auto print = std::bitset<8>(iter);
     std::cout << "return: " << std::hex << print << std::endl;
   }
+      
   return ret;
 
 }
